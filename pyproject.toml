@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "pointset-registration-server"
+version = "0.1.0"
+description = ""
+authors = ["maleicacid <kuroda@hlab.sys.es.osaka-u.ac.jp>"]
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.10"
+probreg = "^0.3.5"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
