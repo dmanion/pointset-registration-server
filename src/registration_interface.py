@@ -62,6 +62,23 @@ if __name__ == '__main__':
         with open(pcd_filename, "wb") as f:
             f.write(request.data)
 
+        ## pcd is rgbd input, so it's pinned along the world coordinate.
+        ## mesh is aligned manually, so the initial pose is stored in mesh_initpose.
+        init_R = np.ndarray([
+            request.args.get("rot_w"),
+            request.args.get("rot_x"),
+            request.args.get("rot_y"),
+            request.args.get("rot_z"),
+        ])
+        init_p = np.array([
+            request.args.get("cam_x"),
+            request.args.get("cam_y"),
+            request.args.get("cam_z"),
+        ])
+        homomat = np.eye(4)
+        homomat[:3, :3] = init_R
+        homomat[:3, 3] = init_p
+        mesh_initpose = o3d.geometry.get_rotation_matrix_from_quaternion(init_R)
         reg_pts_mesh(pcd_filename, mesh_location, mesh_initpose)
 
     app.run()
