@@ -4,7 +4,7 @@ from io import BytesIO
 import datetime
 import numpy as np
 import open3d as o3d
-from flask import Flask, request, render_template
+from flask import Flask, request, jsonify
 from probreg import gmmtree
 
 
@@ -80,5 +80,15 @@ if __name__ == '__main__':
         homomat[:3, 3] = init_p
         mesh_initpose = o3d.geometry.get_rotation_matrix_from_quaternion(init_R)
         reg_pts_mesh(pcd_filename, mesh_location, mesh_initpose)
+
+    @app.route("/0/position")
+    def sendback_pos():
+        key = ["x", "y", "z"]
+        return jsonify([dict(zip(key, result_p))])
+
+    @app.route("/0/orientation")
+    def sendback_rot():
+        key = ["w", "x", "y", "z"]
+        return jsonify([dict(zip(key, result_R))])
 
     app.run()
