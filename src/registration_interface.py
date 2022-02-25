@@ -88,16 +88,12 @@ def draw_registration_result(source, target, transformation):
     source_temp.paint_uniform_color([1, 0.706, 0])
     target_temp.paint_uniform_color([0, 0.651, 0.929])
     source_temp.transform(transformation)
-    o3d.visualization.draw_geometries([source_temp, target_temp],
-                                      zoom=0.4459,
-                                      front=[0.9288, -0.2951, -0.2242],
-                                      lookat=[1.6784, 2.0612, 1.4451],
-                                      up=[-0.3402, -0.9189, -0.1996])
+    o3d.visualization.draw_geometries([source_temp, target_temp])
 
 
 def reg_pts_mesh(pcd_path, mesh_path, trans_init):
-    source = o3d.io.read_triangle_mesh(mesh_path).sample_points_uniformly()
     target = o3d.io.read_point_cloud(pcd_path)
+    source = o3d.io.read_triangle_mesh(mesh_path).sample_points_poisson_disk(target.points.__len__())
     threshold = 0.02
 
     ## show initial
@@ -114,7 +110,7 @@ def reg_pts_mesh(pcd_path, mesh_path, trans_init):
     print(reg_p2p)
     print("Transformation is:")
     print(reg_p2p.transformation)
-    #draw_registration_result(source, target, reg_p2p.transformation)
+    draw_registration_result(source, target, reg_p2p.transformation)
     return reg_p2p.transformation
 
 
