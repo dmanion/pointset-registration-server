@@ -88,7 +88,7 @@ def draw_registration_result(source, target, transformation):
     source_temp.paint_uniform_color([1, 0.706, 0])
     target_temp.paint_uniform_color([0, 0.651, 0.929])
     source_temp.transform(transformation)
-    o3d.visualization.draw_geometries([source_temp, target_temp])
+    o3d.visualization.draw_geometries([source_temp, target_temp], width=640, height=480)
 
 
 def reg_pts_mesh(pcd_path, mesh_path, trans_init):
@@ -106,7 +106,7 @@ def reg_pts_mesh(pcd_path, mesh_path, trans_init):
     reg_p2p = o3d.pipelines.registration.registration_icp(
         source, target, threshold, trans_init,
         o3d.pipelines.registration.TransformationEstimationPointToPoint(),
-        o3d.pipelines.registration.ICPConvergenceCriteria(max_iteration=20), )
+        o3d.pipelines.registration.ICPConvergenceCriteria(max_iteration=2000), )
     print(reg_p2p)
     print("Transformation is:")
     print(reg_p2p.transformation)
@@ -149,8 +149,9 @@ if __name__ == '__main__':
         homomat[:3, :3] = o3d.geometry.get_rotation_matrix_from_quaternion(init_R)
         homomat[:3, 3] = init_p
         result = reg_pts_mesh(pcd_filename, mesh_location, homomat)
-        result_p = result[:3, 3]
-        result_R = result[:3, 3]
+        global result_R, result_p
+        result_p = copy.deepcopy(result[:3, 3])
+        result_R = copy.deepcopy(result[:3, :3])
 
         return jsonify([0])
 
@@ -158,13 +159,17 @@ if __name__ == '__main__':
     @app.route("/0/position")
     def sendback_pos():
         key = ["x", "y", "z"]
-        data = jsonify([dict(zip(key, result_p))])
+        global result_R, result_p
+        data = jsonify([dict(zip(key, result_p.transpose()))])
         return data
 
     @app.route("/0/orientation")
     def sendback_rot():
         key = ["w", "x", "y", "z"]
-        data = jsonify([dict(zip(key, quaternion_from_matrix(result_R)))])
+        global result_R, result_p
+        quat = quaternion_from_matrix(result_R)
+        data = jsonify([dict(zip(key, quat))])
         return data
 
-    app.run()
+
+    app.run(host='0.0.0.0')
